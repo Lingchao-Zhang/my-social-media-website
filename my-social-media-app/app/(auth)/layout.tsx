@@ -4,7 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 
 export const metadata: Metadata = {
   title: 'Threads',
-  description: 'A Next.js 13 Meta Threads Application',
+  description: 'A Next.js 14 Meta Threads Application',
 }
 
 export default function RootLayout({

@@ -18,3 +18,10 @@ export type onboardingUser = {
     biography: string;
     path: string 
 }
+
+export type threadType = {
+    text: string;
+    author: string;
+    communityId: string | null;
+    path: string
+}

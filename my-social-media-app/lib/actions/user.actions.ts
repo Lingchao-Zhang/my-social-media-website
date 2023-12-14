@@ -6,12 +6,7 @@ import { connectToMongoDB } from "../mongoose"
 import { revalidatePath } from "next/cache"
 
 const updateUser = async ({ 
-    userId, 
-    username, 
-    name, 
-    image, 
-    biography,
-    path 
+    userId, username, name, image, biography,path 
 }: onboardingUser): Promise<void> => {
 
     try{
@@ -37,4 +32,13 @@ const updateUser = async ({
     }
 }
 
-export { updateUser }
+const fetchUser = async (userId: string) => {
+    try{
+        connectToMongoDB()
+        return await User.findOne({ id: userId })
+        
+    } catch(error: any){
+        throw new Error(`Failed to create or update user: ${error.message}`)
+    }
+}
+export { updateUser, fetchUser }

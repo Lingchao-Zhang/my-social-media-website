@@ -58,4 +58,43 @@ const fetchThreads = async (currentPageNumber: number, pageSize: number) => {
     }
 }
 
-export { createThread, fetchThreads}
+const fetchThreadById = async (threadId: string) => {
+    try{
+        connectToMongoDB()
+
+        // TODO: populate community
+        const thread = await Thread.findById(threadId)
+                             .populate(
+                                {
+                                    path: "author",
+                                    model: User,
+                                    select: "_id id name image"
+                                }
+                             )
+                             .populate(
+                                {
+                                    path: "children",
+                                    populate: [
+                                        {
+                                            path: "author",
+                                            model: User,
+                                            select: "_id id name parentId image" 
+                                        },
+                                        {
+                                            path: "children",
+                                            model: Thread,
+                                            populate: {
+                                                path: "author",
+                                                model: User,
+                                                select: "_id id name parentId image" 
+                                            }
+                                        }
+                                    ]
+                                }
+                             ).exec()
+        return thread
+    } catch(error: any){
+        throw new Error(`Failed to create or update user: ${error.message}`)
+    }
+}
+export { createThread, fetchThreads, fetchThreadById }

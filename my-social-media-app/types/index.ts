@@ -25,3 +25,31 @@ export type threadType = {
     communityId: string | null;
     path: string
 }
+
+export type ThreadCardType = {
+    threadId: string;
+    currentUserId: string;
+    content: string;
+    parentId: string | null;
+    createdAt: string;
+    author: {
+        id: string;
+        name: string;
+        image: string;
+    };
+    community: {
+        id: string;
+        name: string;
+        image: string;
+    };
+    comments: {
+        author: {
+            image: string;
+        }
+    }[];
+    isComment?: boolean;
+}
+
+export type paramsType = {
+    params: { id: string}
+}

@@ -24,7 +24,7 @@ const createThread = async ({ text, author, communityId, path}: threadType) => {
         })
         revalidatePath(path)
     } catch(error: any){
-        throw new Error(`Failed to create or update user: ${error.message}`)
+        throw new Error(`Failed to create thread: ${error.message}`)
     }
 }
 
@@ -44,7 +44,7 @@ const fetchThreads = async (currentPageNumber: number, pageSize: number) => {
                                 populate: {
                                     path: "author",
                                     model: User,
-                                    select: "_id name parentId image"
+                                    select: "_id username parentId image"
                                 }
                             })
         
@@ -54,8 +54,73 @@ const fetchThreads = async (currentPageNumber: number, pageSize: number) => {
 
         return { displayedThreads, isNext }
     } catch(error: any){
-        throw new Error(`Failed to create or update user: ${error.message}`)
+        throw new Error(`Failed to fetch threads: ${error.message}`)
     }
 }
 
-export { createThread, fetchThreads}
+const fetchThreadById = async (threadId: string) => {
+    try{
+        connectToMongoDB()
+
+        // TODO: populate community
+        const thread = await Thread.findById(threadId)
+                             .populate(
+                                {
+                                    path: "author",
+                                    model: User,
+                                    select: "_id id username image"
+                                }
+                             )
+                             .populate(
+                                {
+                                    path: "children",
+                                    populate: [
+                                        {
+                                            path: "author",
+                                            model: User,
+                                            select: "_id id username parentId image" 
+                                        },
+                                        {
+                                            path: "children",
+                                            model: Thread,
+                                            populate: {
+                                                path: "author",
+                                                model: User,
+                                                select: "_id id username parentId image" 
+                                            }
+                                        }
+                                    ]
+                                }
+                             ).exec()
+        return thread
+    } catch(error: any){
+        throw new Error(`Failed to fetch thread: ${error.message}`)
+    }
+}
+
+const addCommentToThread = async (threadId: string, commentText: string, authorId: string, path: string) => {
+    try{
+        connectToMongoDB()
+
+        // 1. find the original thread that needs to be added comment.
+        const originalThread = await Thread.findById(threadId)
+
+        // 2. create a new thread for the comment
+        const commentThread = await Thread.create({
+            text: commentText,
+            author: authorId,
+            parentId: threadId
+        })
+
+        // 3. add the comment to the original thread
+        originalThread.children.push(commentThread)
+
+        // 4. save the updated original thread
+        await originalThread.save()
+        
+        revalidatePath(path)
+    } catch(error: any){
+        throw new Error(`Failed to add comment to the thread: ${error.message}`)
+    }
+}
+export { createThread, fetchThreads, fetchThreadById, addCommentToThread }

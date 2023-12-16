@@ -34,14 +34,14 @@ export type ThreadCardType = {
     createdAt: string;
     author: {
         id: string;
-        name: string;
+        username: string;
         image: string;
     };
     community: {
         id: string;
         name: string;
         image: string;
-    };
+    } | null;
     comments: {
         author: {
             image: string;
@@ -52,4 +52,10 @@ export type ThreadCardType = {
 
 export type paramsType = {
     params: { id: string}
+}
+
+export type CommentType = {
+    threadId: string;
+    currentUserId: string;
+    currentUserImage: string;
 }

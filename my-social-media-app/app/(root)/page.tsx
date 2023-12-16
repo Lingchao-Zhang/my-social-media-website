@@ -12,7 +12,7 @@ export default async function Home() {
     return null
   } else{
     const userInfo = await fetchUser(user.id)
-    if(!userInfo.onboarded){
+    if(!userInfo?.onboarded){
       redirect("/onboarding")
     } else {
       return (

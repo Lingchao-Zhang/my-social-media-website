@@ -11,7 +11,7 @@ const OnBoarding = async () => {
     } else {
         const userInfo = await fetchUser(user.id) 
         
-        if(userInfo.onboarded){
+        if(userInfo?.onboarded){
             redirect('/')
         } else{
             const userData = {

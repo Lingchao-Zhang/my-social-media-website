@@ -38,7 +38,7 @@ const fetchUser = async (userId: string) => {
         return await User.findOne({ id: userId })
         
     } catch(error: any){
-        throw new Error(`Failed to create or update user: ${error.message}`)
+        throw new Error(`Failed to fetch user: ${error.message}`)
     }
 }
 export { updateUser, fetchUser }

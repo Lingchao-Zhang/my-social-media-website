@@ -1,3 +1,5 @@
+import { ObjectId } from "mongoose";
+
 export type AccountProfileType = {
     user: {
         id: string;
@@ -58,4 +60,24 @@ export type CommentType = {
     threadId: string;
     currentUserId: string;
     currentUserImage: string;
+}
+
+export type ProfileHeaderType = {
+    accountId: string;
+    authUserId: string;
+    image: string; 
+    username: string; 
+    name: string; 
+    biography: string;
+}
+
+export type ThreadTabType = {
+    tabLabel: string;
+    currentUserId: string;
+    profileUser: {
+        objectId: ObjectId;
+        id: string;
+        username: string;
+        image: string;
+    };
 }

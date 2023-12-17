@@ -33,60 +33,62 @@ const ThreadCard = ({
                             <h4 className="cursor-pointer text-base-semibold text-light-1">{author.username}</h4>
                         </Link>
                         <p className="mt-2 text-small-regular text-light-2">{content}</p>
-                        <div className="flex gap-3.5">
-                            <Image 
-                             src={"/heart-gray.svg"}
-                             alt="heart"
-                             width={24}
-                             height={24}
-                             className="cursor-pointer object-contain" 
-                            />
-                            <Link href={`/thread/${threadId}`}>
+                        <div className={`${isComment ? "mb-10" : ""} mt-5 flex flex-col gap-3`}>
+                            <div className="flex gap-3.5">
                                 <Image 
-                                src="/reply.svg"
-                                alt="reply"
+                                src={"/heart-gray.svg"}
+                                alt="heart"
                                 width={24}
                                 height={24}
                                 className="cursor-pointer object-contain" 
                                 />
-                            </Link>
-                            <Image 
-                             src="/share.svg"
-                             alt="share"
-                             width={24}
-                             height={24}
-                             className="cursor-pointer object-contain" 
-                            />
-                            <Image 
-                             src="/repost.svg"
-                             alt="repost"
-                             width={24}
-                             height={24}
-                             className="cursor-pointer object-contain" 
-                            />
+                                <Link href={`/thread/${threadId}`}>
+                                    <Image 
+                                    src="/reply.svg"
+                                    alt="reply"
+                                    width={24}
+                                    height={24}
+                                    className="cursor-pointer object-contain" 
+                                    />
+                                </Link>
+                                <Image 
+                                src="/share.svg"
+                                alt="share"
+                                width={24}
+                                height={24}
+                                className="cursor-pointer object-contain" 
+                                />
+                                <Image 
+                                src="/repost.svg"
+                                alt="repost"
+                                width={24}
+                                height={24}
+                                className="cursor-pointer object-contain" 
+                                />
+                            </div>
+                            {
+                                comments.length > 0 ? 
+                                <Link href={`/thread/${threadId}`}>
+                                    <div className="flex">
+                                        {
+                                            comments.map((comment) => (
+                                                <Image 
+                                                key={comment.author.image}
+                                                src={comment.author.image}
+                                                alt="images of commentors"
+                                                height={14}
+                                                width={14}
+                                                className="cursor-pointer object-contain rounded-xl"
+                                                />
+                                            ))
+                                        }
+                                        <p className="mt-1 ml-2 text-subtle-medium text-gray-1">{comments.length} replies</p>
+                                    </div>
+                                </Link>
+                                :
+                                null
+                            }
                         </div>
-                        {
-                            comments.length > 0 ? 
-                            <Link href={`/thread/${threadId}`}>
-                                <div className="flex">
-                                    {
-                                        comments.map((comment) => (
-                                            <Image 
-                                            key={comment.author.image}
-                                            src={comment.author.image}
-                                            alt="images of commentors"
-                                            height={14}
-                                            width={14}
-                                            className="cursor-pointer object-contain rounded-xl"
-                                            />
-                                        ))
-                                    }
-                                    <p className="mt-1 ml-2 text-subtle-medium text-gray-1">{comments.length} replies</p>
-                                </div>
-                            </Link>
-                            :
-                            null
-                        }
                     </div>
                 </div>
             </div>

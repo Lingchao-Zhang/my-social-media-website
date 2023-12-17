@@ -123,4 +123,5 @@ const addCommentToThread = async (threadId: string, commentText: string, authorI
         throw new Error(`Failed to add comment to the thread: ${error.message}`)
     }
 }
+
 export { createThread, fetchThreads, fetchThreadById, addCommentToThread }

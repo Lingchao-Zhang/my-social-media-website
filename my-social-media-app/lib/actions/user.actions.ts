@@ -1,6 +1,6 @@
 "use server"
 
-import { onboardingUser } from "@/types"
+import { fetchUserParamsType, onboardingUser } from "@/types"
 import User from "../models/user.model"
 import { connectToMongoDB } from "../mongoose"
 import { revalidatePath } from "next/cache"
@@ -86,4 +86,31 @@ const fetchUserComments = async (userId: ObjectId) => {
         throw new Error(`Failed to fetch all comments of the user: ${error.message}`)
     }
 }
-export { updateUser, fetchUser, fetchUserThreads, fetchUserComments }
+
+const fetchUsers = async ({ currentUserId, searchParam, currentPageNumber, pageSize }: fetchUserParamsType) => {
+    try{
+        connectToMongoDB()
+        const skipUsersAmount = (currentPageNumber - 1) * pageSize
+        const regex = new RegExp(searchParam, "i")
+        // find users except current user or user searched by current user
+        const usersQuery = searchParam.trim() === "" ? User.find({ id: {$ne: currentUserId}}) 
+                                                      .skip(skipUsersAmount)
+                                                      .limit(pageSize)
+                                                      .sort({ createdAt: 'desc' })
+                                                    : 
+                                                User.find({ id: {$ne: currentUserId}, $or: [{username: {$regex: regex}}, {name: {$regex: regex}}]}) 
+                                                .skip(skipUsersAmount)
+                                                .limit(pageSize)
+                                                .sort({ createdAt: 'desc' })
+
+        const totalUsersCount = searchParam.trim() === "" ? await Thread.countDocuments({ id: {$ne: currentUserId}}) : 
+                                                            await Thread.countDocuments({ id: {$ne: currentUserId}, $or: [{username: {$regex: regex}}, {name: {$regex: regex}}]})
+        const displayedUsers = await usersQuery.exec()
+        const isNext = totalUsersCount > skipUsersAmount + displayedUsers.length
+
+        return { displayedUsers, isNext}
+    } catch(error: any){
+        throw new Error(`Failed to fetch users: ${error.message}`)
+    }
+}
+export { updateUser, fetchUser, fetchUserThreads, fetchUserComments, fetchUsers }

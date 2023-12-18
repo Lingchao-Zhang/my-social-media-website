@@ -82,7 +82,7 @@ const ThreadCard = ({
                                                 />
                                             ))
                                         }
-                                        <p className="mt-1 ml-2 text-subtle-medium text-gray-1">{comments.length} replies</p>
+                                        <p className="mt-1 ml-2 text-subtle-medium text-gray-1">{comments.length} {comments.length === 1 ? "reply" : "replies"}</p>
                                     </div>
                                 </Link>
                                 :

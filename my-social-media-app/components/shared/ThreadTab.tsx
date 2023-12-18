@@ -1,6 +1,7 @@
 import { fetchUserComments, fetchUserThreads } from "@/lib/actions/user.actions"
 import { ThreadTabType } from "@/types"
 import ThreadCard from "../cards/ThreadCard"
+import { fetchThreadById } from "@/lib/actions/thread.actions"
 
 const ThreadTab = async ({ tabLabel, currentUserId, profileUser}: ThreadTabType) => {
     if(tabLabel === "Threads"){
@@ -30,19 +31,36 @@ const ThreadTab = async ({ tabLabel, currentUserId, profileUser}: ThreadTabType)
         return(
             <section className="mt-9 flex flex-col gap-10">
                 {
-                    comments.map((comment: any) => (
-                        <ThreadCard 
-                            key={comment._id}
-                            threadId={comment._id} 
-                            currentUserId={currentUserId} 
-                            content={comment.text} 
-                            createdAt={comment.createdAt}
-                            parentId={comment.parentId} 
-                            author={profileUser} 
-                            community={comment.community} 
-                            comments={comment.children}          
-                        />   
-                    ))
+                    comments.map(async (comment: any) => {
+                        const originalThread = await fetchThreadById(comment.parentId)
+                        return(
+                            <>
+                                <ThreadCard 
+                                    key={originalThread._id}
+                                    threadId={originalThread._id} 
+                                    currentUserId={currentUserId} 
+                                    content={originalThread.text} 
+                                    createdAt={originalThread.createdAt}
+                                    parentId={originalThread.parentId} 
+                                    author={originalThread.author} 
+                                    community={originalThread.community} 
+                                    comments={originalThread.children}         
+                                />  
+                                <ThreadCard 
+                                    key={comment._id}
+                                    threadId={comment._id} 
+                                    currentUserId={currentUserId} 
+                                    content={comment.text} 
+                                    createdAt={comment.createdAt}
+                                    parentId={comment.parentId} 
+                                    author={profileUser} 
+                                    community={comment.community} 
+                                    comments={comment.children}
+                                    isComment={true}          
+                                />   
+                            </>
+                        )
+                    })
                 }
             </section>
         )

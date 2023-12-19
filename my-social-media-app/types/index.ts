@@ -56,6 +56,7 @@ export type paramsType = {
     params: { id: string}
 }
 
+
 export type CommentType = {
     threadId: string;
     currentUserId: string;
@@ -80,4 +81,18 @@ export type ThreadTabType = {
         username: string;
         image: string;
     };
+}
+
+export type fetchUserParamsType = {
+    currentUserId: string;
+    searchParam: string;
+    currentPageNumber: number;
+    pageSize: number;
+}
+
+export type UserCardType = {
+    userId: string;
+    username: string;
+    name: string;
+    image: string;
 }

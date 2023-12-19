@@ -70,7 +70,7 @@ const fetchUserThreads = async (userId: string) => {
 const fetchUserComments = async (userId: ObjectId) => {
     try{
         connectToMongoDB()
-        const comments = Thread.find({ parentId: {$ne: null}, author: {$in: userId}})
+        const comments = Thread.find({ parentId: {$ne: null}, author: userId})
                                 .sort({ createdAt: "desc"})
                                 .populate({ path: "author", model: User})
                                 .populate({ 
@@ -113,4 +113,31 @@ const fetchUsers = async ({ currentUserId, searchParam, currentPageNumber, pageS
         throw new Error(`Failed to fetch users: ${error.message}`)
     }
 }
-export { updateUser, fetchUser, fetchUserThreads, fetchUserComments, fetchUsers }
+
+const fetchActivities = async (userId: ObjectId) => {
+    try{
+        connectToMongoDB()
+
+        // 1. get all threads created by current user
+        const threads = await Thread.find({ author: userId })
+
+        // 2. get ids of all comments of all threads and merge them in one array
+        const threadsCommentsIds = threads.reduce((acc, currentThread) => {
+            return acc.concat(currentThread.children)
+        }, [])
+
+        // 3. get all comments through ids.
+        const comments = await Thread.find({ _id: {$in: threadsCommentsIds}, author: {$ne: userId} })
+                                     .populate({
+                                        path: "author",
+                                        model: User,
+                                        select: "id username image"
+                                     })
+        
+        return comments
+    } catch(error: any){
+        throw new Error(`Failed to fetch activities: ${error.message}`)
+    }
+}
+
+export { updateUser, fetchUser, fetchUserThreads, fetchUserComments, fetchUsers, fetchActivities }

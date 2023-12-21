@@ -41,7 +41,7 @@ export type ThreadCardType = {
     };
     community: {
         id: string;
-        name: string;
+        communityname: string;
         image: string;
     } | null;
     comments: {
@@ -72,7 +72,7 @@ export type ProfileHeaderType = {
     biography: string;
 }
 
-export type ThreadTabType = {
+export type ProfileTabType = {
     tabLabel: string;
     currentUserId: string;
     profileUser: {
@@ -96,3 +96,20 @@ export type UserCardType = {
     name: string;
     image: string;
 }
+
+export type fetchCommunitiesType = {
+    searchParam: string;
+    currentPageNumber: number; 
+    pageSize: number
+}
+
+export type CommunityCardType = {
+    id: string;
+    name: string;
+    communityname: string;
+    image: string;
+    biography: string;
+    members: {
+      image: string;
+    }[]
+  }

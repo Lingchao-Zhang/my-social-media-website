@@ -1,11 +1,12 @@
 "use server"
 
-import { fetchUserParamsType, onboardingUser } from "@/types"
+import { UserCardType, fetchUserParamsType, onboardingUser } from "@/types"
 import User from "../models/user.model"
 import { connectToMongoDB } from "../mongoose"
 import { revalidatePath } from "next/cache"
 import Thread from "../models/thread.model"
 import { ObjectId } from "mongoose"
+import { fetchThreadById } from "./thread.actions"
 
 const updateUser = async ({ 
     userId, username, name, image, biography,path 
@@ -131,7 +132,7 @@ const fetchActivities = async (userId: ObjectId) => {
                                      .populate({
                                         path: "author",
                                         model: User,
-                                        select: "id username image"
+                                        select: "id username name image"
                                      })
         
         return comments
@@ -140,4 +141,32 @@ const fetchActivities = async (userId: ObjectId) => {
     }
 }
 
-export { updateUser, fetchUser, fetchUserThreads, fetchUserComments, fetchUsers, fetchActivities }
+const fetchTaggedUsers = async (userId: ObjectId) => {
+    try{
+        connectToMongoDB()
+        const otherComments = await fetchActivities(userId)
+        const userComments = await fetchUserComments(userId)
+
+        let authors: any[] = []
+        let authorsId: any[] = []
+        for(let i=0; i < otherComments.length; i++){
+            if(!authors.includes(otherComments[i].author)){
+                authors.push(otherComments[i].author)
+                authorsId.push(otherComments[i].author.id)
+            }
+        }
+
+        for(let i=0; i < userComments.length; i++){
+            const thread = await fetchThreadById(userComments[i].parentId)
+            if(!authorsId.includes(thread.author.id)){
+                authors.push(thread.author)
+            }
+        }
+
+        return authors
+    } catch(error: any){
+        throw new Error(`Failed to fetch tagger users: ${error.message}`)
+    }
+}
+
+export { updateUser, fetchUser, fetchUserThreads, fetchUserComments, fetchUsers, fetchActivities, fetchTaggedUsers }

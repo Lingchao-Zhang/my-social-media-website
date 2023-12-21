@@ -1,9 +1,10 @@
-import { fetchUserComments, fetchUserThreads } from "@/lib/actions/user.actions"
-import { ThreadTabType } from "@/types"
+import { fetchUserComments, fetchUserThreads, fetchTaggedUsers } from "@/lib/actions/user.actions"
+import { ProfileTabType } from "@/types"
 import ThreadCard from "../cards/ThreadCard"
 import { fetchThreadById } from "@/lib/actions/thread.actions"
+import UserCard from "../cards/UserCard"
 
-const ThreadTab = async ({ tabLabel, currentUserId, profileUser}: ThreadTabType) => {
+const ProfileTab = async ({ tabLabel, currentUserId, profileUser}: ProfileTabType) => {
     if(tabLabel === "Threads"){
         const result = await fetchUserThreads(profileUser.id)
         const threads= result.threads
@@ -65,11 +66,23 @@ const ThreadTab = async ({ tabLabel, currentUserId, profileUser}: ThreadTabType)
             </section>
         )
     } else if(tabLabel === "Tagged"){
+        const taggedAuthors = await fetchTaggedUsers(profileUser.objectId)
+
         return(
             <section className="mt-9 flex flex-col gap-10">
+                {
+                    taggedAuthors.map((taggerAuthor) => (
+                        <UserCard 
+                            userId={taggerAuthor.id} 
+                            username={taggerAuthor.username} 
+                            name={taggerAuthor.name} 
+                            image={taggerAuthor.image} 
+                        />
+                    ))
+                }
             </section>
         )
     }
 }
 
-export default ThreadTab
+export default ProfileTab

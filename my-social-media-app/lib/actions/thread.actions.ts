@@ -68,7 +68,7 @@ const fetchThreadById = async (threadId: string) => {
                                 {
                                     path: "author",
                                     model: User,
-                                    select: "_id id username image"
+                                    select: "_id id username name image"
                                 }
                              )
                              .populate(

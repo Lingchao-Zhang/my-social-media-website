@@ -5,6 +5,7 @@ import { connectToMongoDB } from "../mongoose"
 import Thread from "../models/thread.model"
 import { revalidatePath } from "next/cache"
 import User from "../models/user.model"
+import Community from "../models/community.model"
 
 const createThread = async ({ text, author, communityId, path}: threadType) => {
     try{
@@ -65,11 +66,18 @@ const fetchThreadById = async (threadId: string) => {
         // TODO: populate community
         const thread = await Thread.findById(threadId)
                              .populate(
-                                {
-                                    path: "author",
-                                    model: User,
-                                    select: "_id id username name image"
-                                }
+                                [
+                                    {
+                                        path: "author",
+                                        model: User,
+                                        select: "_id id username name image"
+                                    },
+                                    {
+                                        path: "community",
+                                        model: Community,
+                                        select: "_id id communityname name image"
+                                    }
+                                ]
                              )
                              .populate(
                                 {
@@ -124,4 +132,33 @@ const addCommentToThread = async (threadId: string, commentText: string, authorI
     }
 }
 
-export { createThread, fetchThreads, fetchThreadById, addCommentToThread }
+const deleteThread = async (threadId: string) => {
+    try{
+        connectToMongoDB()
+        // 1. find the targeted thread
+        const targetedThread = await Thread.findById(threadId)
+        
+        // 2. remove the thread from its author's threads
+        await User.findOneAndUpdate(
+            { _id: targetedThread.author },
+            { $pull: { threads: targetedThread._id }}
+        )
+
+        // 3. if the thread is created by community, then remove it from the community
+        if(targetedThread.community){
+            await Community.findOneAndUpdate(
+                { _id: targetedThread.community },
+                { $pull: { threads: targetedThread._id }}
+            )
+        }
+
+        // 4. delete the thread
+        await Thread.findByIdAndDelete(threadId)
+
+        return { success: true }
+    } catch(error: any){
+        throw new Error(`Failed to delete the thread: ${error.message}`)
+    }
+}
+
+export { createThread, fetchThreads, fetchThreadById, addCommentToThread, deleteThread }

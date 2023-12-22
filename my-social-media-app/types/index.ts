@@ -9,7 +9,6 @@ export type AccountProfileType = {
         biography: string;
         imageUrl: string;
     };
-    buttonTitle: string
 }
 
 export type onboardingUser = {
@@ -113,3 +112,17 @@ export type CommunityCardType = {
       image: string;
     }[]
   }
+
+export type CommunityTabType = {
+    tabLabel: string;
+    currentUserId: string;
+    communityInfo: {
+        communityId: string;
+        members: {
+            id: string;
+            username: string;
+            name: string;
+            image: string;
+        }[]
+    };
+}

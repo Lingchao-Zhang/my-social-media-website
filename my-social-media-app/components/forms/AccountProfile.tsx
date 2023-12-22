@@ -22,7 +22,7 @@ import { isBase64Image } from "@/lib/utils"
 import { updateUser } from "@/lib/actions/user.actions"
 import { usePathname, useRouter } from "next/navigation"
 
-const AccountProfile = ({ user, buttonTitle }:  AccountProfileType) => {
+const AccountProfile = ({ user }:  AccountProfileType) => {
     const [files, setFiles] = useState<File[]>([])
     const pathname = usePathname()
     const router = useRouter()

@@ -24,7 +24,6 @@ const SingleThread = async ({params: {id}}: paramsType) => {
                     currentUserId={user.id} 
                     content={thread.text} 
                     createdAt={thread.createdAt}
-                    parentId={thread.parentId} 
                     author={thread.author} 
                     community={thread.community} 
                     comments={thread.children}           
@@ -46,7 +45,6 @@ const SingleThread = async ({params: {id}}: paramsType) => {
                         currentUserId={user.id} 
                         content={child.text} 
                         createdAt={child.createdAt}
-                        parentId={child.parentId} 
                         author={child.author} 
                         community={child.community} 
                         comments={child.children} 

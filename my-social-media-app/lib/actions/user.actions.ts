@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache"
 import Thread from "../models/thread.model"
 import { ObjectId } from "mongoose"
 import { fetchThreadById } from "./thread.actions"
+import Community from "../models/community.model"
 
 const updateUser = async ({ 
     userId, username, name, image, biography,path 
@@ -60,6 +61,11 @@ const fetchUserThreads = async (userId: string) => {
                                         model: User,
                                         select: "id username image"
                                     }
+                                },
+                                {
+                                    path: "community",
+                                    model: Community,
+                                    select: "_id id communityname name image"
                                 }]
                             })
         return result

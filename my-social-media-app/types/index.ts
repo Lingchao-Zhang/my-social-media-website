@@ -31,7 +31,6 @@ export type ThreadCardType = {
     threadId: string;
     currentUserId: string;
     content: string;
-    parentId: string | null;
     createdAt: string;
     author: {
         id: string;
@@ -131,4 +130,8 @@ export type PaginationType = {
     pageNumber: number;
     isNext: boolean;
     path: string;
+}
+
+export type DeleteThreadType = {
+    threadId: string;
 }

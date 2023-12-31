@@ -51,12 +51,12 @@ z
                                         {
                                             communityTab.label === "Threads" ?
                                             (<p className="ml-1 rounded-sm bg-light-4 px-2 py-1 !text-tiny-medium text-light-2">
-                                                1
+                                                {communityInfo.threads.length}
                                             </p> )
                                             :
                                             communityTab.label === "Members" ?
                                             (<p className="ml-1 rounded-sm bg-light-4 px-2 py-1 !text-tiny-medium text-light-2">
-                                                2
+                                                {communityInfo.members.length}
                                             </p>)
                                             :
                                             null

@@ -1,3 +1,4 @@
+"use server"
 import { fetchCommunitiesType } from "@/types"
 import Community from "../models/community.model"
 import User from "../models/user.model"
@@ -9,7 +10,7 @@ const createCommunity = async (id: string, name: string, communityname: string, 
     try{
         connectToMongoDB()
         // 1. find the user who create the community
-        const creator = await User.findById(creatorId)
+        const creator = await User.findOne({ id: creatorId })
 
         // 2. create a new community 
         const community = await Community.create({
@@ -22,7 +23,7 @@ const createCommunity = async (id: string, name: string, communityname: string, 
         })
 
         // 3. add the new founded community to creator
-        creator.communities.push(community)
+        creator.communities.push(community._id)
 
         // 4. save the result
         await creator.save()
@@ -80,7 +81,7 @@ const fetchCommunities = async ({ searchParam, currentPageNumber, pageSize }: fe
 const fetchCommunityById = async (communityId: string) => {
     try{
         connectToMongoDB()
-        const community = await Community.findById(communityId)
+        const community = await Community.findOne({ id: communityId })
                                          .populate(
                                             [
                                                 {
@@ -109,7 +110,7 @@ const fetchCommunityThreads = async (communityId: string) => {
         connectToMongoDB()
         
         // find the community through its id and retrieve all its threads
-        const result = Community.findById(communityId)
+        const result = Community.findOne({ id: communityId })
                                  .populate({
                                     path: "threads",
                                     model: Thread,
@@ -118,6 +119,11 @@ const fetchCommunityThreads = async (communityId: string) => {
                                             path: "author",
                                             model: User,
                                             select: "id username name image"
+                                        },
+                                        {
+                                            path: "community",
+                                            model: Community,
+                                            select: "_id id communityname name image"
                                         },
                                         {
                                             path: "children",
@@ -141,13 +147,13 @@ const addMemberToCommunity = async (communityId: string, userId: string) => {
         connectToMongoDB()
 
         // 1. find the targeted community
-        const targetedCommunity = await Community.findById(communityId)
+        const targetedCommunity = await Community.findOne({ id: communityId })
 
         // 2. find the targeted user
-        const targetedUser = await User.findById(userId)
+        const targetedUser = await User.findOne({ id: userId })
 
         // 3. if the user is not in the community then add the user to the community
-        if(!targetedCommunity.memebers.includes(targetedUser._id)){
+        if(!targetedCommunity.members.includes(targetedUser._id)){
             targetedCommunity.members.push(targetedUser._id)
 
             // 4. save the updated community
@@ -171,10 +177,10 @@ const removeUserFromCommunity = async (userId: string, communityId: string) => {
         connectToMongoDB()
 
         // 1. find the targeted community
-        const targetedCommunity = await Community.findById(communityId)
+        const targetedCommunity = await Community.findOne({ id: communityId })
 
         // 2. find the targeted user
-        const targetedUser = await User.findById(userId)
+        const targetedUser = await User.findOne({ id: userId })
 
         // if user is in the community, then remove this user from the community
         if(targetedCommunity.members.includes(targetedUser._id)){
@@ -197,8 +203,8 @@ const updateCommunityInfo = async (communityId: string, name: string, communityn
     try{
         connectToMongoDB()
         // 1. find the targeted community and update
-        const updatedCommunity = await Community.findByIdAndUpdate(
-            communityId,
+        const updatedCommunity = await Community.findOneAndUpdate(
+            { id: communityId },
             {
                 communityname,
                 name,
@@ -217,7 +223,7 @@ const deleteCommunity = async (communityId: string) => {
         connectToMongoDB()
 
         // 1. find the targeted community
-        const targetedCommunity = await Community.findById(communityId)
+        const targetedCommunity = await Community.findOne({ id: communityId })
 
         // 2. find all members of the community and delete the community from their communities
         targetedCommunity.members.map(async (member: ObjectId) => {
@@ -237,7 +243,7 @@ const deleteCommunity = async (communityId: string) => {
         await Thread.deleteMany({ community: targetedCommunity._id })
 
         // 5. delete the community
-        await Community.findByIdAndDelete(communityId)
+        await Community.findOneAndDelete({ id: communityId })
 
         return{ success: true }
     } catch(error: any){

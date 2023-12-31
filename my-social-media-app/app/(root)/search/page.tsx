@@ -7,8 +7,9 @@ import { redirect } from "next/navigation"
 import Image from "next/image"
 import { fetchCommunities } from "@/lib/actions/community.actions"
 import CommunityCard from "@/components/cards/CommunityCard"
+import Pagination from "@/components/shared/Pagination"
 
-const SearchPage = async ({ searchParams: { query } }: { searchParams: { query: string | null } }) => {
+const SearchPage = async ({ searchParams: { query, page } }: { searchParams: { query: string | null, page: string | null } }) => {
     const user = await currentUser()
     if(!user){
         return null
@@ -17,11 +18,12 @@ const SearchPage = async ({ searchParams: { query } }: { searchParams: { query: 
         if(!userInfo?.onboarded){
             redirect("/onboarding")
         } else{
+            const currentPageNumber = page ? parseInt(page) : 1
             const fetchUserParam = {
                 currentUserId: user.id, 
                 searchParam: query ? query : "",
-                currentPageNumber: 1, 
-                pageSize: 20
+                currentPageNumber: currentPageNumber, 
+                pageSize: 2
             }
 
             const fetchCommunitiesParams = {
@@ -33,6 +35,7 @@ const SearchPage = async ({ searchParams: { query } }: { searchParams: { query: 
             const usersResult = await fetchUsers(fetchUserParam)
             const communitiesResult = await fetchCommunities(fetchCommunitiesParams)
             const users = usersResult.displayedUsers
+            const usersIsNext = usersResult.isNext
             const communites = communitiesResult.displayedCommunities
 
             return(
@@ -84,6 +87,12 @@ const SearchPage = async ({ searchParams: { query } }: { searchParams: { query: 
                                             ))
                                         }
                                     </div>
+
+                                    <Pagination 
+                                        pageNumber={currentPageNumber} 
+                                        isNext={usersIsNext} 
+                                        path={"search"}                                    
+                                    />
                                 </>
                             </TabsContent>
                             <TabsContent

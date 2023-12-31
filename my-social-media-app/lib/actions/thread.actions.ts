@@ -1,4 +1,4 @@
-"use server"
+"use server" 
 
 import { threadType } from "@/types"
 import { connectToMongoDB } from "../mongoose"
@@ -10,12 +10,13 @@ import Community from "../models/community.model"
 const createThread = async ({ text, author, communityId, path}: threadType) => {
     try{
         connectToMongoDB()
-
+        const communityPulisher = await Community.findOne({ id: communityId })
+        console.log(communityPulisher._id) 
         const createdThread = await Thread.create(
             {
                 text,
                 author,
-                community: communityId
+                community: communityPulisher._id
             }
         )
 
@@ -23,6 +24,12 @@ const createThread = async ({ text, author, communityId, path}: threadType) => {
         await User.findByIdAndUpdate(author, {
             $push: { threads: createdThread._id }
         })
+
+        if(communityId){
+            await Community.findOneAndUpdate({ id: communityId }, {
+                $push: { threads: createdThread._id }
+            })
+        }
         revalidatePath(path)
     } catch(error: any){
         throw new Error(`Failed to create thread: ${error.message}`)
@@ -40,6 +47,7 @@ const fetchThreads = async (currentPageNumber: number, pageSize: number) => {
                              .skip(skipThreadsAmount)
                              .limit(pageSize)
                              .populate({ path: "author", model: User})
+                             .populate({ path: "community", model: Community })
                              .populate({ 
                                 path: "children",
                                 populate: {
@@ -138,21 +146,27 @@ const deleteThread = async (threadId: string) => {
         // 1. find the targeted thread
         const targetedThread = await Thread.findById(threadId)
         
-        // 2. remove the thread from its author's threads
-        await User.findOneAndUpdate(
-            { _id: targetedThread.author },
-            { $pull: { threads: targetedThread._id }}
-        )
-
-        // 3. if the thread is created by community, then remove it from the community
-        if(targetedThread.community){
-            await Community.findOneAndUpdate(
-                { _id: targetedThread.community },
+        // if the thread is not a comment
+        if(!targetedThread.parentId){
+            // 2. remove the thread from its author's threads
+            await User.findOneAndUpdate(
+                { _id: targetedThread.author },
                 { $pull: { threads: targetedThread._id }}
             )
+    
+            // 3. if the thread is created by community, then remove it from the community
+            if(targetedThread.community){
+                await Community.findOneAndUpdate(
+                    { _id: targetedThread.community },
+                    { $pull: { threads: targetedThread._id }}
+                )
+            }
         }
+        
+        // 4. delete all the children(comments) of the thread
+        await Thread.deleteMany({ parentId: threadId })
 
-        // 4. delete the thread
+        // 5. delete the thread
         await Thread.findByIdAndDelete(threadId)
 
         return { success: true }

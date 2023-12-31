@@ -1,6 +1,6 @@
-"use server"
+"use server" 
 
-import { UserCardType, fetchUserParamsType, onboardingUser } from "@/types"
+import { fetchUserParamsType, onboardingUser } from "@/types"
 import User from "../models/user.model"
 import { connectToMongoDB } from "../mongoose"
 import { revalidatePath } from "next/cache"
@@ -104,12 +104,12 @@ const fetchUsers = async ({ currentUserId, searchParam, currentPageNumber, pageS
                                                 .limit(pageSize)
                                                 .sort({ createdAt: 'desc' })
 
-        const totalUsersCount = searchParam.trim() === "" ? await Thread.countDocuments({ id: {$ne: currentUserId}}) : 
-                                                            await Thread.countDocuments({ id: {$ne: currentUserId}, $or: [{username: {$regex: regex}}, {name: {$regex: regex}}]})
+        const totalUsersCount = searchParam.trim() === "" ? await User.countDocuments({ id: {$ne: currentUserId}}) : 
+                                                            await User.countDocuments({ id: {$ne: currentUserId}, $or: [{username: {$regex: regex}}, {name: {$regex: regex}}]})
         const displayedUsers = await usersQuery.exec()
         const isNext = totalUsersCount > skipUsersAmount + displayedUsers.length
 
-        return { displayedUsers, isNext}
+        return { displayedUsers, isNext }
     } catch(error: any){
         throw new Error(`Failed to fetch users: ${error.message}`)
     }

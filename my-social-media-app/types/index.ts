@@ -126,3 +126,9 @@ export type CommunityTabType = {
         }[]
     };
 }
+
+export type PaginationType = {
+    pageNumber: number;
+    isNext: boolean;
+    path: string;
+}

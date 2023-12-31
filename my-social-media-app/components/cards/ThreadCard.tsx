@@ -3,12 +3,12 @@ import { formatDateString } from "@/lib/utils"
 import { ThreadCardType } from "@/types"
 import Image from "next/image"
 import Link from "next/link"
+import DeleteThread from "../shared/DeleteThread"
 
 const ThreadCard = ({ 
     threadId,
     currentUserId,
     content,
-    parentId,
     author,
     createdAt,
     community,
@@ -92,6 +92,12 @@ const ThreadCard = ({
                         </div>
                     </div>
                 </div>
+                {
+                    currentUserId === author.id ? 
+                    <DeleteThread threadId={threadId}/>
+                    :
+                    null
+                }
             </div>
                 {
                  !isComment ? community ? (

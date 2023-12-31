@@ -10,26 +10,40 @@ import Community from "../models/community.model"
 const createThread = async ({ text, author, communityId, path}: threadType) => {
     try{
         connectToMongoDB()
-        const communityPulisher = await Community.findOne({ id: communityId })
-        console.log(communityPulisher._id) 
-        const createdThread = await Thread.create(
-            {
-                text,
-                author,
-                community: communityPulisher._id
-            }
-        )
-
-        // update user to add new created thread
-        await User.findByIdAndUpdate(author, {
-            $push: { threads: createdThread._id }
-        })
-
         if(communityId){
+            const communityPulisher = await Community.findOne({ id: communityId })
+            const createdThread = await Thread.create(
+                {
+                    text,
+                    author,
+                    community: communityPulisher._id
+                }
+            )
+
+            // update user to add new created thread
+            await User.findByIdAndUpdate(author, {
+                $push: { threads: createdThread._id }
+            })
+
             await Community.findOneAndUpdate({ id: communityId }, {
                 $push: { threads: createdThread._id }
             })
+
+        } else{
+            const createdThread = await Thread.create(
+                {
+                    text,
+                    author,
+                    community: null
+                }
+            )
+
+            // update user to add new created thread
+            await User.findByIdAndUpdate(author, {
+                $push: { threads: createdThread._id }
+            })
         }
+
         revalidatePath(path)
     } catch(error: any){
         throw new Error(`Failed to create thread: ${error.message}`)
@@ -145,7 +159,7 @@ const deleteThread = async (threadId: string) => {
         connectToMongoDB()
         // 1. find the targeted thread
         const targetedThread = await Thread.findById(threadId)
-        
+
         // if the thread is not a comment
         if(!targetedThread.parentId){
             // 2. remove the thread from its author's threads
@@ -165,8 +179,16 @@ const deleteThread = async (threadId: string) => {
         
         // 4. delete all the children(comments) of the thread
         await Thread.deleteMany({ parentId: threadId })
+        
+        // 5. if the thread is a comment, then delete it from its original thread(parent)
+        if(targetedThread.parentId){
+            await Thread.findOneAndUpdate(
+                { _id: targetedThread.parentId },
+                { $pull: { children: targetedThread._id }}
+            )
+        }
 
-        // 5. delete the thread
+        // 6. delete the thread
         await Thread.findByIdAndDelete(threadId)
 
         return { success: true }

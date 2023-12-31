@@ -17,7 +17,6 @@ const CommunityTab = async ({ tabLabel, currentUserId, communityInfo }: Communit
                             currentUserId={currentUserId} 
                             content={thread.text} 
                             createdAt={thread.createdAt}
-                            parentId={thread.parentId} 
                             author={thread.author} 
                             community={thread.community} 
                             comments={thread.children}          

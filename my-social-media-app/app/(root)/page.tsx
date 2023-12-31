@@ -38,7 +38,6 @@ export default async function Home({ searchParams: { page }}: { searchParams: { 
                       currentUserId={user.id} 
                       content={thread.text} 
                       createdAt={thread.createdAt}
-                      parentId={thread.parentId} 
                       author={thread.author} 
                       community={thread.community} 
                       comments={thread.children}           

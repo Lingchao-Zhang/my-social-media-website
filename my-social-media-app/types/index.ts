@@ -9,7 +9,6 @@ export type AccountProfileType = {
         biography: string;
         imageUrl: string;
     };
-    buttonTitle: string
 }
 
 export type onboardingUser = {
@@ -41,7 +40,7 @@ export type ThreadCardType = {
     };
     community: {
         id: string;
-        name: string;
+        communityname: string;
         image: string;
     } | null;
     comments: {
@@ -72,7 +71,7 @@ export type ProfileHeaderType = {
     biography: string;
 }
 
-export type ThreadTabType = {
+export type ProfileTabType = {
     tabLabel: string;
     currentUserId: string;
     profileUser: {
@@ -95,4 +94,41 @@ export type UserCardType = {
     username: string;
     name: string;
     image: string;
+}
+
+export type fetchCommunitiesType = {
+    searchParam: string;
+    currentPageNumber: number; 
+    pageSize: number
+}
+
+export type CommunityCardType = {
+    id: string;
+    name: string;
+    communityname: string;
+    image: string;
+    biography: string;
+    members: {
+      image: string;
+    }[]
+  }
+
+export type CommunityTabType = {
+    tabLabel: string;
+    currentUserId: string;
+    communityInfo: {
+        communityId: string;
+        members: {
+            id: string;
+            username: string;
+            name: string;
+            image: string;
+        }[]
+    };
+}
+
+export type PaginationType = {
+    pageNumber: number;
+    isNext: boolean;
+    path: string;
 }

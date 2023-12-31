@@ -28,8 +28,7 @@ const OnBoarding = async () => {
                     <p className="text-light-2 mt-3 text-base-regular">Please fill the following fields to complete your profile setup.</p>
                     <section className="mt-9 bg-dark-2 p-10">
                         <AccountProfile 
-                        user={userData}
-                        buttonTitle="continue"            
+                        user={userData}           
                         />
                     </section>
                 </main>

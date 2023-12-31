@@ -1,5 +1,5 @@
 import ProfileHeader from "@/components/shared/ProfileHeader"
-import { fetchUser, fetchUserComments } from "@/lib/actions/user.actions"
+import { fetchTaggedUsers, fetchUser, fetchUserComments } from "@/lib/actions/user.actions"
 import { paramsType } from "@/types"
 import { currentUser } from "@clerk/nextjs"
 import { redirect } from "next/navigation"
@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { profileTabs } from "@/constants"
 import Image from "next/image"
 import { fetchUserThreads } from "@/lib/actions/user.actions"
-import ThreadTab from "@/components/shared/ThreadTab"
+import ProfileTab from "@/components/shared/ProfileTab"
 
 const ProfilePage = async ({ params: { id }}: paramsType) => {
     const user = await currentUser()
@@ -26,6 +26,7 @@ const ProfilePage = async ({ params: { id }}: paramsType) => {
             const result = await fetchUserThreads(id)
             const threads= result.threads
             const comments = await fetchUserComments(userInfo._id)
+            const taggedAuthors = await fetchTaggedUsers(userInfo._id)
             return(
                <div>
                  <ProfileHeader 
@@ -66,7 +67,9 @@ z
                                                 {comments.length}
                                             </p>)
                                             :
-                                            null
+                                            <p className="ml-1 rounded-sm bg-light-4 px-2 py-1 !text-tiny-medium text-light-2">
+                                                {taggedAuthors.length}
+                                            </p>
                                         }
                                     </TabsTrigger>
                                 ))
@@ -79,7 +82,7 @@ z
                                     key={`content-${profileTab.value}`} 
                                     value={profileTab.value}
                                 >
-                                    <ThreadTab 
+                                    <ProfileTab 
                                         tabLabel={profileTab.label} 
                                         currentUserId={user.id} 
                                         profileUser={{

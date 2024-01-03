@@ -1,6 +1,5 @@
 import ThreadCard from "@/components/cards/ThreadCard"
 import Pagination from "@/components/shared/Pagination"
-import { createCommunity, deleteCommunity, updateCommunityInfo } from "@/lib/actions/community.actions"
 import { fetchThreads } from "@/lib/actions/thread.actions"
 import { fetchUser } from "@/lib/actions/user.actions"
 import { currentUser } from "@clerk/nextjs"
@@ -19,7 +18,7 @@ export default async function Home({ searchParams: { page }}: { searchParams: { 
       const result = await fetchThreads(currentPageNumber, 2)
       const threads = result.displayedThreads 
       const isNext = result.isNext
-    
+      
       return (
         <>
           <section className="mt-9 flex flex-col gap-10">

@@ -102,14 +102,12 @@ const fetchUsers = async ({ currentUserId, searchParam, currentPageNumber, pageS
         // find users except current user or user searched by current user
         const usersQuery = searchParam.trim() === "" ? User.find({ id: {$ne: currentUserId}}) 
                                                       .skip(skipUsersAmount)
-                                                      .limit(pageSize)
-                                                      .sort({ createdAt: 'desc' })
+                                                      .limit(pageSize)                                                    
                                                     : 
                                                 User.find({ id: {$ne: currentUserId}, $or: [{username: {$regex: regex}}, {name: {$regex: regex}}]}) 
                                                 .skip(skipUsersAmount)
                                                 .limit(pageSize)
-                                                .sort({ createdAt: 'desc' })
-
+                                                
         const totalUsersCount = searchParam.trim() === "" ? await User.countDocuments({ id: {$ne: currentUserId}}) : 
                                                             await User.countDocuments({ id: {$ne: currentUserId}, $or: [{username: {$regex: regex}}, {name: {$regex: regex}}]})
         const displayedUsers = await usersQuery.exec()
@@ -171,8 +169,56 @@ const fetchTaggedUsers = async (userId: ObjectId) => {
 
         return authors
     } catch(error: any){
-        throw new Error(`Failed to fetch tagger users: ${error.message}`)
+        throw new Error(`Failed to fetch tagged users: ${error.message}`)
     }
 }
 
-export { updateUser, fetchUser, fetchUserThreads, fetchUserComments, fetchUsers, fetchActivities, fetchTaggedUsers }
+const fetchSuggestedUsers = async (userId: ObjectId) => {
+    try{
+        connectToMongoDB()
+        // 1. users from the same community
+        // 2. tagged users(exclude your tagged user and yourself) of your tagged users
+        const taggedUsers = await fetchTaggedUsers(userId)
+        const taggedUsersId = taggedUsers.reduce((acc, taggedUser) => {
+            return acc.concat(taggedUser.id)
+        },[]) 
+        const currentUser = await User.findOne({ _id: userId })
+        let suggestedUsers: any[] = []
+        
+        if(currentUser.communities.length !== 0){
+            for(let i = 0; i < currentUser.communities.length; i++){
+                const communityObjectId = currentUser.communities[i]
+                const community = await Community.findOne({ _id: communityObjectId })
+                const creator = await User.findOne({ _id: community.createdBy })
+                if(creator.id !== currentUser.id){
+                    suggestedUsers.push(creator)
+                }
+                for(let j = 0; j < community.members.length; j++){
+                    const memberObjectId = community.members[j]
+                    const member = await User.findOne({ _id: memberObjectId })
+                    if(member.id !== currentUser.id && !taggedUsersId.includes(member.id)){
+                        suggestedUsers.push(member)
+                    }
+                }
+            }
+        }
+
+        for(let i = 0; i < taggedUsers.length; i++){
+            const taggedUsersOfTaggedUser = await fetchTaggedUsers(taggedUsers[i]._id)
+            
+            for(let j = 0; j < taggedUsersOfTaggedUser.length; j++){
+                const taggedUsersOfTaggedUserId = taggedUsersOfTaggedUser[j].id
+                // exclude user herself and her tagged users
+                if(taggedUsersOfTaggedUserId !== currentUser.id && !taggedUsersId.includes(taggedUsersOfTaggedUserId)){
+                    suggestedUsers.push(taggedUsersOfTaggedUser[j])
+                }
+            }
+        }
+
+        return suggestedUsers
+    } catch(error: any){
+        throw new Error(`Failed to fetch suggested users: ${error.message}`)
+    }
+}
+
+export { updateUser, fetchUser, fetchUserThreads, fetchUserComments, fetchUsers, fetchActivities, fetchTaggedUsers, fetchSuggestedUsers }

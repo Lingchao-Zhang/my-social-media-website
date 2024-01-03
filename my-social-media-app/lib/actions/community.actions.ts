@@ -5,6 +5,7 @@ import User from "../models/user.model"
 import { connectToMongoDB } from "../mongoose"
 import Thread from "../models/thread.model"
 import { ObjectId } from "mongoose"
+import { fetchTaggedUsers } from "./user.actions"
 
 const createCommunity = async (id: string, name: string, communityname: string, image: string, biography: string, creatorId: string) => {
     try{
@@ -251,6 +252,32 @@ const deleteCommunity = async (communityId: string) => {
     } 
 }
 
+const fetchSuggestedCommunities = async (userId: ObjectId) => {
+    try{
+        connectToMongoDB()
+        // community of tagged user
+        const currentUser = await User.findOne({ _id: userId })
+        const taggedUsers = await fetchTaggedUsers(userId)
+        let suggestedCommunites: any[] = []
+        for(let i = 0; i < taggedUsers.length; i++){
+            const taggedUser = await User.findOne({ id: taggedUsers[i].id })
+            if(taggedUser.communities.length !== 0){
+                for(let j = 0; j < taggedUser.communities.length; j++){
+                    const communityObjectId = taggedUser.communities[j]
+                    if(!currentUser.communities.includes(communityObjectId)){
+                        const community = await Community.findOne({ _id: communityObjectId })
+                        const communityDetails = await fetchCommunityById(community.id)
+                        suggestedCommunites.push(communityDetails)
+                    }
+                }
+            }
+        }
+
+        return suggestedCommunites
+    } catch(error: any){
+        throw new Error(`Failed to fetch suggested communites: ${error.message}`)
+    } 
+}
 export { createCommunity, fetchCommunities, fetchCommunityById, 
     fetchCommunityThreads, addMemberToCommunity, removeUserFromCommunity, 
-    updateCommunityInfo, deleteCommunity }
+    updateCommunityInfo, deleteCommunity, fetchSuggestedCommunities }

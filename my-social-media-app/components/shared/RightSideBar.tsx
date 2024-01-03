@@ -1,4 +1,4 @@
-import { fetSuggestedUsers, fetchUser } from "@/lib/actions/user.actions"
+import { fetchSuggestedUsers, fetchUser } from "@/lib/actions/user.actions"
 import { currentUser } from "@clerk/nextjs"
 import { redirect } from "next/navigation"
 import UserCard from "../cards/UserCard"
@@ -14,7 +14,7 @@ const RightSideBar = async () => {
         if(!userInfo?.onboarded){
             redirect("/onboarding")
         } else{
-            const suggestedUsers = await fetSuggestedUsers(userInfo._id)
+            const suggestedUsers = await fetchSuggestedUsers(userInfo._id)
             const suggestedCommunities = await fetchSuggestedCommunities(userInfo._id)
             return(
                 <section className="rightsidebar custom-scrollbar">

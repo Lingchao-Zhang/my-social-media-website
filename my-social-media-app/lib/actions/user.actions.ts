@@ -173,7 +173,7 @@ const fetchTaggedUsers = async (userId: ObjectId) => {
     }
 }
 
-const fetSuggestedUsers = async (userId: ObjectId) => {
+const fetchSuggestedUsers = async (userId: ObjectId) => {
     try{
         connectToMongoDB()
         // 1. users from the same community
@@ -221,4 +221,4 @@ const fetSuggestedUsers = async (userId: ObjectId) => {
     }
 }
 
-export { updateUser, fetchUser, fetchUserThreads, fetchUserComments, fetchUsers, fetchActivities, fetchTaggedUsers, fetSuggestedUsers }
+export { updateUser, fetchUser, fetchUserThreads, fetchUserComments, fetchUsers, fetchActivities, fetchTaggedUsers, fetchSuggestedUsers }
